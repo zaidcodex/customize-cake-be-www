@@ -21,3 +21,7 @@ app.use('/api/product', require('./routes/products'))
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
+router.get("/", ()=>{
+    console.log("app is running")
+})
