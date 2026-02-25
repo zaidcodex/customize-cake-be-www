@@ -104,6 +104,24 @@ catch(err)
     }
 })
 
+router.get('/get-product-by-subcat/:id', async (req, res)=>{
+    try{
+    const {id} = req.params
+    
+    const products = await Product.find({ subCategoryId: id });
+    if(!products){
+        res.status(404).json({message:'Product not found',  success:false})
+    }
+    res.status(201).json({message:'Your product find successfully', products, success:true})
+}
+catch(err)
+{
+    console.log(err)
+        res.status(400).json({message:'Your product not find',  success:false})
+
+    }
+})
+
 
 
 module.exports = router

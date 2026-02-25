@@ -19,10 +19,9 @@ router.post('/createuser', async(req, res) => {
     admin.save()
 
     res.send(data)
-
-
-
 })
+
+
 
 router.post('/login', async(req, res) => {
     const username = req.body.username
