@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-
   trackingId: {
     type: Number,
-    required: true,
-    unique: true
+    unique: true,
+    required: true
   },
 
   customer: {
@@ -16,7 +15,6 @@ const orderSchema = new mongoose.Schema({
 
   items: [
     {
-      productId: String,
       productName: String,
       quantity: Number,
       price: Number,
@@ -43,9 +41,18 @@ const orderSchema = new mongoose.Schema({
 
   orderStatus: {
     type: String,
-    enum: ["Pending", "Confirmed", "Baking", "Out For Delivery", "Delivered"],
+    enum: [
+      "Pending",
+      "Confirmed",
+      "Baking",
+      "Out For Delivery",
+      "Delivered",
+      "Cancelled"
+    ],
     default: "Pending"
-  }
+  },
+
+  deliveryDate: Date
 
 }, { timestamps: true });
 

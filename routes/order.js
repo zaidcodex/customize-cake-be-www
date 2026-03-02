@@ -4,39 +4,15 @@ const Order = require("../models/Order");
 
 router.post("/create", async (req, res) => {
   try {
+    const order = await Order.create(req.body);
 
-    const {
-      trackingId,
-      items,
-      totalAmount,
-      paymentMethod
-    } = req.body;
-
-    const advanceAmount =
-      paymentMethod === "ADVANCE"
-        ? Math.round(totalAmount * 0.3)
-        : 0;
-
-    const remainingAmount =
-      paymentMethod === "ADVANCE"
-        ? totalAmount - advanceAmount
-        : totalAmount;
-
-    const newOrder = await Order.create({
-      trackingId,
-      items,
-      totalAmount,
-      advanceAmount,
-      remainingAmount,
-      paymentMethod,
-      paymentStatus:
-        paymentMethod === "ADVANCE" ? "Partial" : "Pending"
+    res.json({
+      success: true,
+      order
     });
 
-    res.json({ success: true, order: newOrder });
-
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ success: false });
   }
 });
