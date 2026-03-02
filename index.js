@@ -20,6 +20,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/category', require('./routes/category'));
 app.use('/api/subcategory', require('./routes/subcat'));
 app.use('/api/product', require('./routes/products'));
+app.use('/api/order', require('./routes/order'));
 
 // Root route
 app.get("/", (req, res) => {
