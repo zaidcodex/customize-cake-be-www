@@ -22,6 +22,14 @@ const orderSchema = new mongoose.Schema(
         selectedSize: String,
         selectedFlavour: String,
         selectedShape: String,
+        productImage: {        // Cloudinary image URL of the product / custom cake
+          type: String,
+          default: null,
+        },
+        isCustomCake: {        // true if built via "Build Your Cake" page
+          type: Boolean,
+          default: false,
+        },
       },
     ],
 
@@ -63,6 +71,5 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 module.exports = mongoose.model("Order", orderSchema);

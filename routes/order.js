@@ -8,7 +8,6 @@ const generateTrackingId = async () => {
   return last ? last.trackingId + 1 : 1000;
 };
 
-
 // ── POST /api/orders/create ──────────────────────────────────────────────────
 router.post("/create", async (req, res) => {
   try {
@@ -35,10 +34,22 @@ router.post("/create", async (req, res) => {
 
     const trackingId = await generateTrackingId();
 
+    // Sanitize items — pick only known fields (including new ones)
+    const sanitizedItems = (items || []).map((item) => ({
+      productName: item.productName,
+      quantity: item.quantity,
+      price: item.price,
+      selectedSize: item.selectedSize || null,
+      selectedFlavour: item.selectedFlavour || null,
+      selectedShape: item.selectedShape || null,
+      productImage: item.productImage || null,   // ← new
+      isCustomCake: item.isCustomCake || false,  // ← new
+    }));
+
     const order = await Order.create({
       trackingId,
       customer,
-      items,
+      items: sanitizedItems,
       totalAmount,
       advanceAmount,
       remainingAmount,
@@ -75,6 +86,25 @@ router.get("/", async (req, res) => {
 router.get("/:trackingId", async (req, res) => {
   try {
     const order = await Order.findOne({ trackingId: req.params.trackingId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// ── PATCH /api/orders/:id/status ─────────────────────────────────────────────
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const { orderStatus } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { orderStatus },
+      { new: true }
+    );
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found." });
     }
