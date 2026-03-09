@@ -24,7 +24,6 @@ router.post("/create", async (req, res) => {
       deliveryDate,
     } = req.body;
 
-    // Validate screenshot for ADVANCE orders
     if (paymentMethod === "ADVANCE" && !paymentScreenshotUrl) {
       return res.status(400).json({
         success: false,
@@ -34,7 +33,6 @@ router.post("/create", async (req, res) => {
 
     const trackingId = await generateTrackingId();
 
-    // Sanitize items — pick only known fields (including new ones)
     const sanitizedItems = (items || []).map((item) => ({
       productName: item.productName,
       quantity: item.quantity,
@@ -42,8 +40,8 @@ router.post("/create", async (req, res) => {
       selectedSize: item.selectedSize || null,
       selectedFlavour: item.selectedFlavour || null,
       selectedShape: item.selectedShape || null,
-      productImage: item.productImage || null,   // ← new
-      isCustomCake: item.isCustomCake || false,  // ← new
+      productImage: item.productImage || null,
+      isCustomCake: item.isCustomCake || false,
     }));
 
     const order = await Order.create({
@@ -60,11 +58,7 @@ router.post("/create", async (req, res) => {
       deliveryDate,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Order placed successfully!",
-      order,
-    });
+    res.status(201).json({ success: true, message: "Order placed successfully!", order });
   } catch (err) {
     console.error("Order creation error:", err);
     res.status(500).json({ success: false, message: "Internal server error." });
@@ -86,9 +80,7 @@ router.get("/", async (req, res) => {
 router.get("/:trackingId", async (req, res) => {
   try {
     const order = await Order.findOne({ trackingId: req.params.trackingId });
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found." });
-    }
+    if (!order) return res.status(404).json({ success: false, message: "Order not found." });
     res.json({ success: true, order });
   } catch (err) {
     console.error(err);
@@ -97,17 +89,50 @@ router.get("/:trackingId", async (req, res) => {
 });
 
 // ── PATCH /api/orders/:id/status ─────────────────────────────────────────────
+// Updates orderStatus only
+// Body: { orderStatus: "Confirmed" | "Baking" | "Out For Delivery" | "Delivered" | "Cancelled" }
 router.patch("/:id/status", async (req, res) => {
   try {
     const { orderStatus } = req.body;
+
+    const validStatuses = ["Pending", "Confirmed", "Baking", "Out For Delivery", "Delivered", "Cancelled"];
+    if (!orderStatus || !validStatuses.includes(orderStatus)) {
+      return res.status(400).json({ success: false, message: `Invalid orderStatus. Must be one of: ${validStatuses.join(", ")}` });
+    }
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       { orderStatus },
       { new: true }
     );
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found." });
+    if (!order) return res.status(404).json({ success: false, message: "Order not found." });
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// ── PATCH /api/orders/:id/payment-status ─────────────────────────────────────
+// Updates paymentStatus only
+// Body: { paymentStatus: "Pending" | "Partial" | "Paid" }
+router.patch("/:id/payment-status", async (req, res) => {
+  try {
+    const { paymentStatus } = req.body;
+
+    const validStatuses = ["Pending", "Partial", "Paid"];
+    if (!paymentStatus || !validStatuses.includes(paymentStatus)) {
+      return res.status(400).json({ success: false, message: `Invalid paymentStatus. Must be one of: ${validStatuses.join(", ")}` });
     }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { paymentStatus },
+      { new: true }
+    );
+    if (!order) return res.status(404).json({ success: false, message: "Order not found." });
+
     res.json({ success: true, order });
   } catch (err) {
     console.error(err);
