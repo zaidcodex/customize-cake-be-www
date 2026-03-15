@@ -24,8 +24,8 @@ router.post('/createuser', async(req, res) => {
 
 
 router.post('/login', async(req, res) => {
-    const username = req.body.username
-    const user = await Admin.findOne({ username: username })
+    const email = req.body.email
+    const user = await Admin.findOne({ username: email })
     if (!user) {
         return res.status(404).send("Please enter correct credentials")
     }
