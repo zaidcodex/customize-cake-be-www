@@ -24,11 +24,16 @@ router.post("/create", async (req, res)=>{
 
     })
     const save = await product.save()
-    res.status(201).json({message:'YOur product creates successfully', save, success:true})}
+    res.status(201).json({message:'Your product creates successfully', save, success:true})}
     catch(error){
-        console.log(error)
-        res.status(400).json({mesasge:"Product not created", success:false})
-    }
+    console.log("CREATE PRODUCT ERROR:", error);
+
+    res.status(400).json({
+        message: error.message,
+        error,
+        success:false
+    })
+}
 })
 
 router.post('/update/:id', async (req, res)=>{

@@ -46,7 +46,7 @@ const ProductSchema = new Schema({
   ],
 
   sizes: [{
-    label: String,
+    size: String,
     price: Number
   }],
 
